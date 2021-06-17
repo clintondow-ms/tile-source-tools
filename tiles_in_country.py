@@ -14,12 +14,12 @@ API = 'api-version=2.0'
 BASE = 'https://t-azmaps.azurelbs.com/map/tile'
 CHUNK_SIZE = 2000
 CORES = 10
-COUNTRY = "Burundi"
+COUNTRY = "France"
 KEY = 'FrvcIwC_84Jv5g8mZ4ezpk8-oVae6vVzufnDlydufyU'
 LOG_CHUNK_SIZE = 400000
 TILESET = 'microsoft.imagery.v2'
 TMP_DIR = "C:/Users/cdow/Desktop/test/"
-ZOOM = 18
+ZOOM = 15
 
 sub = f'subscription-key={KEY}'
 url = f'{BASE}?{sub}&{API}&tilesetId={TILESET}&zoom={ZOOM}'
@@ -105,6 +105,7 @@ if __name__ == "__main__":
                     print("Pausing...")
                     time.sleep(120)
                     print(datetime.datetime.now())
+                    requests_sent = 0
             except:
                 print("Error " + file)
                 continue
