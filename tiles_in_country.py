@@ -98,7 +98,7 @@ if __name__ == "__main__":
                     data = json.load(chunk)
                     asyncio.run(send_requests(data))
                 os.remove(file)
-                # Pause every 400k requests due to log size limit
+                # Throttle requests due to log size limit
                 requests_sent += CHUNK_SIZE
                 if requests_sent >= LOG_CHUNK_SIZE:
                     print(datetime.datetime.now())
