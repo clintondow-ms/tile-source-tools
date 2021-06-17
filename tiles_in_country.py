@@ -4,6 +4,7 @@ import json
 import math
 import os
 import tempfile
+import time
 from multiprocessing import Pool
 
 import aiohttp
@@ -14,6 +15,7 @@ BASE = 'https://t-azmaps.azurelbs.com/map/tile'
 COUNTRY = "Kenya"
 CHUNK_SIZE = 2000
 KEY = 'FrvcIwC_84Jv5g8mZ4ezpk8-oVae6vVzufnDlydufyU'
+LOG_CHUNK_SIZE = 400000
 TILESET = 'microsoft.imagery.v2'
 TMP_DIR = "C:/Users/cdow/Desktop/test/"
 ZOOM = 15
@@ -38,7 +40,7 @@ def num2deg(xtile, ytile, zoom):
     return (lat_deg, lon_deg)
 
 
-async def main(data):    
+async def send_requests(data):    
     jobs = []
     session = aiohttp.ClientSession()
     async with session:
@@ -79,14 +81,23 @@ for i in range(0, len(tiles_in_buffer), CHUNK_SIZE):
 print(COUNTRY)
 print(datetime.datetime.now())
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+requests_sent = 0
+# Loop to deal with networking issues for large number of requests
 while len(os.listdir(TMP_DIR)) > 0:
     for file in os.listdir(TMP_DIR):
         file = TMP_DIR + file
         try:
             with open(file, 'r') as chunk:
                 data = json.load(chunk)
-                asyncio.run(main(data))
+                asyncio.run(send_requests(data))
             os.remove(file)
+            # Pause and timestamp every 400k requests due to log size limit
+            requests_sent += CHUNK_SIZE
+            if requests_sent >= LOG_CHUNK_SIZE:
+                print(datetime.datetime.now())
+                print("Pausing...")
+                time.sleep(120)
+                print(datetime.datetime.now())
         except:
             print("Error " + file)
             continue
