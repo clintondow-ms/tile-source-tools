@@ -29,13 +29,13 @@ if COUNTRY and STATE:
     print("Country or state, not both. Exiting.")
     sys.exit(0)
 if COUNTRY:
-    with open(r"..\geo-countries\data\countries.geojson") as geojson_file:
+    with open(r"data\countries.geojson") as geojson_file:
         data = json.load(geojson_file)
     features = data['features']
     country = [f for f in features if f['properties']['ADMIN'] == COUNTRY][0]
     buffer = shape(country['geometry']).buffer(0.02)
 if STATE:
-    with open(r"..\geo-states\data\us_states.geojson") as geojson_file:
+    with open(r"data\us_states.geojson") as geojson_file:
         data = json.load(geojson_file)
     features = data['features']
     country = [f for f in features if f['properties']['NAME'] == STATE][0]
