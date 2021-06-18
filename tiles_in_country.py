@@ -3,6 +3,7 @@ import datetime
 import json
 import math
 import os
+import sys
 import tempfile
 import time
 from multiprocessing import Pool
@@ -14,20 +15,31 @@ API = 'api-version=2.0'
 BASE = 'https://t-azmaps.azurelbs.com/map/tile'
 CHUNK_SIZE = 2000
 CORES = 10
-COUNTRY = "France"
+COUNTRY = None
 KEY = 'FrvcIwC_84Jv5g8mZ4ezpk8-oVae6vVzufnDlydufyU'
 LOG_CHUNK_SIZE = 400000
+STATE = "New York"
 TILESET = 'microsoft.imagery.v2'
 TMP_DIR = "C:/Users/cdow/Desktop/test/"
 ZOOM = 15
 
 sub = f'subscription-key={KEY}'
 url = f'{BASE}?{sub}&{API}&tilesetId={TILESET}&zoom={ZOOM}'
-with open("..\geo-countries\data\countries.geojson") as geojson_file:
+if COUNTRY and STATE:
+    print("Country or state, not both. Exiting.")
+    sys.exit(0)
+if COUNTRY:
+    with open(r"..\geo-countries\data\countries.geojson") as geojson_file:
         data = json.load(geojson_file)
-features = data['features']
-country = [f for f in features if f['properties']['ADMIN'] == COUNTRY][0]
-buffer = shape(country['geometry']).buffer(0.02)
+    features = data['features']
+    country = [f for f in features if f['properties']['ADMIN'] == COUNTRY][0]
+    buffer = shape(country['geometry']).buffer(0.02)
+if STATE:
+    with open(r"..\geo-states\data\us_states.geojson") as geojson_file:
+        data = json.load(geojson_file)
+    features = data['features']
+    country = [f for f in features if f['properties']['NAME'] == STATE][0]
+    buffer = shape(country['geometry']).buffer(0.02)
 
 
 def deg2num(lat_deg, lon_deg, zoom):
@@ -76,7 +88,8 @@ if __name__ == "__main__":
     print("Tiles in envelope: " + str(len(tiles_in_envelope)))
     # Within checks are CPU bound, parallelize for speed increase
     pool = Pool(CORES)
-    results = pool.map(is_within, tiles_in_envelope)
+    chunk_size = len(tiles_in_envelope) / 10
+    results = pool.imap(is_within, tiles_in_envelope, chunksize=chunk_size)
     tiles_in_buffer = [r for r in results if r]
     print("Tiles in buffer: " + str(len(tiles_in_buffer)))
     print(datetime.datetime.now())
@@ -85,7 +98,7 @@ if __name__ == "__main__":
         chunk = tiles_in_buffer[i:i+CHUNK_SIZE]
         data = json.dumps(chunk)
         file.write(bytes(data, 'utf-8'))
-    print(COUNTRY)
+    print(COUNTRY if COUNTRY else STATE)
     print(datetime.datetime.now())
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     requests_sent = 0
