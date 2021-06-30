@@ -1,4 +1,5 @@
 import datetime
+import json
 import math
 import time
 
@@ -6,7 +7,7 @@ import aiohttp
 import asyncio
 
 BASE = 'https://t-azmaps.azurelbs.com/map/tile'
-KEY = 'FrvcIwC_84Jv5g8mZ4ezpk8-oVae6vVzufnDlydufyU'
+KEY = json.load(open('keys.json'))['test']
 TILESET = 'microsoft.imagery.v2'
 ZOOM = 18
 
