@@ -15,13 +15,13 @@ API = 'api-version=2.0'
 BASE = 'https://t-azmaps.azurelbs.com/map/tile'
 CHUNK_SIZE = 2000
 CORES = 10
-COUNTRY = None
+COUNTRY = "Brazil"
 KEY = 'FrvcIwC_84Jv5g8mZ4ezpk8-oVae6vVzufnDlydufyU'
 LOG_CHUNK_SIZE = 400000
-STATE = "New York"
+STATE = None
 TILESET = 'microsoft.imagery.v2'
 TMP_DIR = "C:/Users/cdow/Desktop/test/"
-ZOOM = 15
+ZOOM = 14
 
 sub = f'subscription-key={KEY}'
 url = f'{BASE}?{sub}&{API}&tilesetId={TILESET}&zoom={ZOOM}'
@@ -88,7 +88,8 @@ if __name__ == "__main__":
     print("Tiles in envelope: " + str(len(tiles_in_envelope)))
     # Within checks are CPU bound, parallelize for speed increase
     pool = Pool(CORES)
-    chunk_size = len(tiles_in_envelope) / 10
+    chunk_size = int(len(tiles_in_envelope) / 10)
+    print(chunk_size)
     results = pool.imap(is_within, tiles_in_envelope, chunksize=chunk_size)
     tiles_in_buffer = [r for r in results if r]
     print("Tiles in buffer: " + str(len(tiles_in_buffer)))
